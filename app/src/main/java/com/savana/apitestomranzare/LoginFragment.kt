@@ -2,15 +2,17 @@ package com.savana.apitestomranzare
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.navigation.ActivityNavigator
+import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import com.savana.apitestomranzare.Model.LoginDataModel
+import com.savana.apitestomranzare.Model.loginDataModel
 import com.savana.apitestomranzare.Model.loginUserInput
 import retrofit2.Call
 import retrofit2.Callback
@@ -19,6 +21,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class LoginFragment : Fragment() {
+
+    var loggedIn: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,60 +46,69 @@ class LoginFragment : Fragment() {
 
         loginButton.setOnClickListener {
             loginUser()
+
+            /*if (loggedIn == true) {
+                navController.navigate(R.id.homeFragment)
+            }*/
         }
     }
 
     fun loginUser() {
 
-        //getting the user values
+        // Getting the user values
         val mobile: String =
             view?.findViewById<EditText>(R.id.et_mobile_login)?.getText().toString().trim()
         val password: String =
             view?.findViewById<EditText>(R.id.et_pass_login)?.getText().toString().trim()
 
-        //building retrofit object
+        // Building retrofit object
         val retrofit: Retrofit = Retrofit.Builder()
             .baseUrl("http://app.omranaz.com/api/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        //Defining retrofit api service
-        val loginService = retrofit.create(loginApi::class.java)
+        // Defining retrofit api service
+        val loginService = retrofit.create(labApi::class.java)
 
-        //Defining the user object as we need to pass it with the call
+        // Defining the user object as we need to pass it with the call
         val user = loginUserInput(mobile, password)
 
-        //defining the call
-        val call: Call<LoginDataModel> = loginService.loginUser(
+        // Defining the call
+        val call: Call<loginDataModel> = loginService.loginUser(
             user.mobile,
-            user.password,
+            user.password
         )
-
-        //calling the api
-        call.enqueue(object : Callback<LoginDataModel?> {
+        // Calling the api
+        call.enqueue(object : Callback<loginDataModel?> {
 
             override fun onResponse(
-                call: Call<LoginDataModel?>?,
-                response: Response<LoginDataModel?>
+                call: Call<loginDataModel?>?,
+                response: Response<loginDataModel?>
             ) {
 
                 Log.d("TAG_1_LOGIN", "${response.body()?.message}")
                 Log.d("TAG_2_LOGIN", "${response.body()}")
-
                 Toast.makeText(
                     requireActivity(),
                     "${response.body()?.message}",
                     Toast.LENGTH_SHORT
                 )
                     .show()
+
+                val navController = Navigation.findNavController(requireActivity(), R.id.mainFrame)
+                if (response.body()!!.success) {
+                    navController.navigate(R.id.homeFragment)
+                }
+
             }
 
-            override fun onFailure(call: Call<LoginDataModel?>?, t: Throwable) {
+            override fun onFailure(call: Call<loginDataModel?>?, t: Throwable) {
 
                 Log.d("TAG_F_LOGIN", "${t.message}")
-
                 Toast.makeText(requireActivity(), "${t.message}", Toast.LENGTH_SHORT)
                     .show()
+
+                loggedIn = false
             }
         })
     }

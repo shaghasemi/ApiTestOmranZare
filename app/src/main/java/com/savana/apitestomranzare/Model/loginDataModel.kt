@@ -1,6 +1,6 @@
 package com.savana.apitestomranzare.Model
 
-data class LoginDataModel(
+data class loginDataModel(
     val access_token: String,
     val `data`: Data,
     val message: String,

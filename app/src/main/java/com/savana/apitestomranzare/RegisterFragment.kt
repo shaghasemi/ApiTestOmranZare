@@ -55,7 +55,6 @@ class RegisterFragment : Fragment() {
         val password_confirmation: String =
             view?.findViewById<EditText>(R.id.et_pass_confirm_register)?.getText().toString().trim()
 
-
         //building retrofit object
         val retrofit: Retrofit = Retrofit.Builder()
             .baseUrl("http://app.omranaz.com/api/")
@@ -63,13 +62,13 @@ class RegisterFragment : Fragment() {
             .build()
 
         //Defining retrofit api service
-        val service = retrofit.create(registerApi::class.java)
+        val service = retrofit.create(labApi::class.java)
 
         //Defining the user object as we need to pass it with the call
         val user = registerUserInput(mobile, password, password_confirmation)
 
         //defining the call
-        val call: Call<registerDataModel> = service.createUser(
+        val call: Call<registerDataModel> = service.registerUser(
             user.mobile,
             user.password,
             user.password_confirmation
